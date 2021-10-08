@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
+	"github.com/Zyian/gw2-droplake-api/api"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
+	"os/signal"
+	"time"
 )
 
 func init() {
@@ -13,6 +17,8 @@ func init() {
 	viper.AddConfigPath("$HOME/.droplake/")
 	viper.AddConfigPath(".")
 	viper.SetEnvPrefix("droplake")
+
+	viper.SetDefault("db_uri", "mongodb://localhost")
 }
 
 func main() {
@@ -28,4 +34,18 @@ func main() {
 		logrus.Debugf("config loading failed; using default values")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	srv := api.NewServer(ctx)
+
+	go srv.ListenAndServe(ctx)
+	logrus.Info("Listening on ", viper.GetString("addr"))
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill)
+
+	<-c
+	srv.Shutdown(ctx)
+	logrus.Info("Got Interrupt Signal, Exiting")
 }
