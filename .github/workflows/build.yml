@@ -16,4 +16,4 @@ jobs:
       - name: Build
         run: |
           go test -race ./...
-          GOOS=linux GOARCH=amd64 go build -o droplake cmd/droplake-api/main.go
+          GOOS=linux GOARCH=amd64 go build -o mythwright-api cmd/mythwright-api/main.go

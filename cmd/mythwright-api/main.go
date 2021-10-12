@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/Zyian/gw2-droplake-api/api"
+	"github.com/Zyian/mythwright-api/api"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"

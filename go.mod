@@ -1,4 +1,4 @@
-module github.com/Zyian/gw2-droplake-api
+module github.com/Zyian/mythwright-api
 
 go 1.16
 
