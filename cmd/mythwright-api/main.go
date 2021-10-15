@@ -18,11 +18,19 @@ func init() {
 	viper.AddConfigPath(".")
 	viper.SetEnvPrefix("droplake")
 
-	viper.SetDefault("db_uri", "mongodb://localhost")
+	defaultValues := map[string]interface{}{
+		"addr":       ":8000",
+		"db_uri":     "mongodb://localhost",
+		"log_level":  "info",
+		"default_db": "mythwright",
+	}
+	for k, v := range defaultValues {
+		viper.SetDefault(k, v)
+	}
 }
 
 func main() {
-	if ll := os.Getenv("LOG_LEVEL"); ll != "" {
+	if ll := viper.GetString("log_level"); ll != "" {
 		level, err := logrus.ParseLevel(ll)
 		if err == nil {
 			logrus.SetLevel(level)

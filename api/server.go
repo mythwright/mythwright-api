@@ -3,49 +3,49 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/Zyian/mythwright-api/db"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"net/http"
 	"time"
 )
 
-func init() {
-	viper.SetDefault("addr", ":8000")
-}
-
 type Server struct {
 	s  *http.Server
-	db *mongo.Client
+	db *db.Database
 }
 
 func NewServer(ctx context.Context) *Server {
-	r := buildMuxRouter(mux.NewRouter())
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(viper.GetString("db_uri")))
-	if err != nil {
-		logrus.Panic(err)
-	}
-
-	if err := client.Ping(ctx, readpref.Primary()); err != nil {
-		logrus.Panic(err)
-	}
-	logrus.Info("Successfully Connected and Pinged MongoDB")
-
-	return &Server{
+	s := &Server{
 		s: &http.Server{
-			Handler:      r,
 			Addr:         viper.GetString("addr"),
 			WriteTimeout: 15 * time.Second,
 			ReadTimeout:  15 * time.Second,
 		},
 	}
+	s.s.Handler = buildMuxRouter(s, mux.NewRouter())
+
+	database, err := db.NewDatabase(ctx)
+	if err != nil {
+		panic(err)
+	}
+	s.db = database
+
+	return s
 }
 
-func buildMuxRouter(r *mux.Router) *mux.Router {
+func buildMuxRouter(s *Server, r *mux.Router) *mux.Router {
+	h := map[string]map[string]http.HandlerFunc{
+		"POST": {
+			`/items/inputs`:   postInputsHandler(s),
+			`/items/mappings`: postItemMappings(s),
+		},
+	}
+	for m, hm := range h {
+		for path, handler := range hm {
+			r.Methods(m).Path(path).HandlerFunc(handler)
+		}
+	}
 	return r
 }
 
@@ -67,8 +67,4 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (s *Server) PingDB(ctx context.Context) error {
-	return s.db.Ping(ctx, readpref.Primary())
 }

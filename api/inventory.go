@@ -1,18 +1,22 @@
 package api
 
-import "context"
+import (
+	"context"
+	"github.com/sirupsen/logrus"
+	"net/http"
+)
 
 func (s *Server) LoadItems() {
 
 }
 
-type DroppedItem struct {
-	ItemID          int     `bson:"item_id" json:"item_id,omitempty"`
-	QuantityDropped int     `bson:"quantity_dropped" json:"quantity_dropped,omitempty"`
-	SourceItemID    int     `bson:"source_item_id" json:"source_item_id,omitempty"`
-	PriceForSample  float64 `bson:"price_for_sample" json:"price_for_sample,omitempty"`
+func postInputsHandler(s *Server) func(w http.ResponseWriter, r *http.Request) {
+	logrus.WithFields(logrus.Fields{}).Info("got it")
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
 }
 
-func (s *Server) PostInputs(ctx context.Context) {
+func (s *Server) postInputs(ctx context.Context) {
 
 }
