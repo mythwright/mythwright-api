@@ -11,12 +11,12 @@ import (
 )
 
 func init() {
-	viper.SetConfigName("config")
+	viper.SetConfigName(".config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/")
-	viper.AddConfigPath("$HOME/.droplake/")
+	viper.AddConfigPath("$HOME/.mythwright/")
 	viper.AddConfigPath(".")
-	viper.SetEnvPrefix("droplake")
+	viper.SetEnvPrefix("mythwright")
 
 	defaultValues := map[string]interface{}{
 		"addr":       ":8000",
@@ -45,7 +45,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	srv := api.NewServer(ctx)
+	srv, _ := api.NewServer(ctx)
 
 	go srv.ListenAndServe(ctx)
 	logrus.Info("Listening on ", viper.GetString("addr"))
